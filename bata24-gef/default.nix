@@ -1,26 +1,29 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, makeWrapper
-, gdb
-, python311
-, bintools-unwrapped
-, file
-, ps
-, git
-, coreutils
-, one_gadget
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  makeWrapper,
+  gdb,
+  python311,
+  bintools-unwrapped,
+  file,
+  ps,
+  git,
+  coreutils,
+  one_gadget,
 }:
 
 let
-  pythonPath = with python311.pkgs; makePythonPath [
-    keystone-engine
-    unicorn
-    capstone
-    ropper
-    crccheck
-    tqdm
-  ];
+  pythonPath =
+    with python311.pkgs;
+    makePythonPath [
+      keystone-engine
+      unicorn
+      capstone
+      ropper
+      crccheck
+      tqdm
+    ];
 
 in
 stdenv.mkDerivation rec {
@@ -31,7 +34,7 @@ stdenv.mkDerivation rec {
     owner = "bata24";
     repo = "gef";
     rev = "dev";
-    sha256 = "sha256-0g7Qh434tvPpvpSW4fOAGTOqGdpgr9eMqrC2/Yj11RU=";
+    sha256 = "sha256-oRE3HSze4W3r11v4MDUg8ccZUCUGDxOm4t8uT1qhMd0=";
   };
 
   dontBuild = true;
@@ -39,18 +42,20 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [ makeWrapper ];
 
   installPhase = ''
-        mkdir -p $out/share/gef
-        cp gef.py $out/share/gef
-        makeWrapper ${gdb}/bin/gdb $out/bin/gef \
-          --add-flags "-q -x $out/share/gef/gef.py" \
-          --set NIX_PYTHONPATH ${pythonPath} \
-          --prefix PATH : ${lib.makeBinPath [
-            python311
-            bintools-unwrapped # for readelf
-            file
-            ps
-    		one_gadget
-          ]}
+    mkdir -p $out/share/gef
+    cp gef.py $out/share/gef
+    makeWrapper ${gdb}/bin/gdb $out/bin/gef \
+      --add-flags "-q -x $out/share/gef/gef.py" \
+      --set NIX_PYTHONPATH ${pythonPath} \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          python311
+          bintools-unwrapped # for readelf
+          file
+          ps
+          one_gadget
+        ]
+      }
   '';
 
   nativeCheckInputs = [
