@@ -1,25 +1,27 @@
-{ lib
-, buildPythonPackage
-, fetchFromGitHub
-, fetchpatch
-, stdenv
-, zlib
-, xz
-, gzip
-, bzip2
-, gnutar
-, p7zip
-, cabextract
-, cramfsprogs
-, cramfsswap
-, sasquatch
-, squashfsTools
-, matplotlib
-, nose
-, pycrypto
-, pyqtgraph
-, capstone
-, visualizationSupport ? false }:
+{
+  lib,
+  buildPythonPackage,
+  fetchFromGitHub,
+  fetchpatch,
+  stdenv,
+  zlib,
+  xz,
+  gzip,
+  bzip2,
+  gnutar,
+  p7zip,
+  cabextract,
+  cramfsprogs,
+  cramfsswap,
+  sasquatch,
+  squashfsTools,
+  matplotlib,
+  nose,
+  pycrypto,
+  pyqtgraph,
+  capstone,
+  visualizationSupport ? false,
+}:
 
 buildPythonPackage rec {
   pname = "binwalk${lib.optionalString visualizationSupport "-full"}";
@@ -45,9 +47,29 @@ buildPythonPackage rec {
     })
   ];
 
-  propagatedBuildInputs = [ zlib xz gzip bzip2 gnutar p7zip cabextract squashfsTools xz pycrypto capstone ]
-  ++ lib.optionals visualizationSupport [ matplotlib pyqtgraph ]
-  ++ lib.optionals (!stdenv.isDarwin) [ cramfsprogs cramfsswap sasquatch ];
+  propagatedBuildInputs =
+    [
+      zlib
+      xz
+      gzip
+      bzip2
+      gnutar
+      p7zip
+      cabextract
+      squashfsTools
+      xz
+      pycrypto
+      capstone
+    ]
+    ++ lib.optionals visualizationSupport [
+      matplotlib
+      pyqtgraph
+    ]
+    ++ lib.optionals (!stdenv.isDarwin) [
+      cramfsprogs
+      cramfsswap
+      sasquatch
+    ];
 
   # setup.py only installs version.py during install, not test
   postPatch = ''

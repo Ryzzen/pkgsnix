@@ -1,8 +1,9 @@
-{ lib
-, rustPlatform
-, fetchFromGitHub
-, pkg-config
-, libusb
+{
+  lib,
+  rustPlatform,
+  fetchFromGitHub,
+  pkg-config,
+  libusb1,
 }:
 
 rustPlatform.buildRustPackage rec {
@@ -13,17 +14,17 @@ rustPlatform.buildRustPackage rec {
     owner = "ch32-rs";
     repo = "wchisp";
     rev = version;
-    hash = "sha256-r3n8IlWLgnWtN7cbrT80lrg/+o8kRhXLL7jDxL20va4=";
+    hash = "sha256-IId80M1fHF6WVgcL8i7CPer5KBhukBkPa8jYCBqSQeY=";
   };
 
-  cargoHash = "sha256-/zdD75+/WaKgB+FcGNWbg99NGr+7yqdrdxOxZ45PrhE=";
+  cargoHash = "sha256-aPRaABa7WDy1vjwTpT9Y0t5oofBHmHip0ycv6cBtgpU=";
 
   nativeBuildInputs = [
     pkg-config
   ];
 
   buildInputs = [
-    libusb
+    libusb1
   ];
 
   meta = with lib; {

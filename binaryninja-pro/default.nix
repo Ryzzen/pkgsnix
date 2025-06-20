@@ -13,9 +13,10 @@
   glib,
   fontconfig,
   dbus,
+  runtimeShell,
 }:
 stdenv.mkDerivation rec {
-  name = "binary-ninja";
+  name = "binary-ninja-pro";
   buildInputs = [
     autoPatchelfHook
     makeWrapper
@@ -30,7 +31,7 @@ stdenv.mkDerivation rec {
     fontconfig
     dbus
   ];
-  src = ~/Overworld/Tools/binary-ninja/binaryninja_free_linux.zip;
+  src = ~/Overworld/Tools/binary-ninja/linux/binaryninja_commercial_linux.zip;
 
   icon = fetchurl {
     urls = [ "https://binary.ninja/icons/android-chrome-512x512.png" ];
@@ -38,11 +39,11 @@ stdenv.mkDerivation rec {
   };
 
   bninjaDesktopItem = makeDesktopItem {
-    name = "binary-ninja";
-    exec = "binaryninja";
+    name = "binaryninja-jailed";
+    exec = "binaryninja-jailed";
     icon = icon;
-    comment = "Binary Ninja Disassembler";
-    desktopName = "Binary Ninja";
+    comment = "Binary Ninja Disassembler without network access";
+    desktopName = "Binary Ninja Jailed";
     genericName = "Interactive Disassembler";
     categories = [ "Development" ];
   };
@@ -60,8 +61,17 @@ stdenv.mkDerivation rec {
     cp -r * $out/opt
     chmod +x $out/opt/binaryninja
     makeWrapper $out/opt/binaryninja \
-          $out/bin/binaryninja \
+          $out/opt/binaryninja-wrapped \
           --prefix "QT_QPA_PLATFORM" ":" "wayland"
+
+    command_path="$out/bin/binaryninja-jailed"
+    cat << EOF > "$command_path"
+    #! ${runtimeShell} -e
+    exec /run/wrappers/bin/firejail --net=none "$out/opt/binaryninja-wrapped"
+    EOF
+    chmod 0755 "$command_path"
+
+
     install -d $out/share/applications
     cp $bninjaDesktopItem/share/applications/* $out/share/applications
   '';

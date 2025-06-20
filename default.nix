@@ -20,5 +20,7 @@
   wlink = pkgs.callPackage ./wlink { };
   nrf-connect = pkgs.callPackage ./nrf-connect { };
   mirage-bt = pkgs.callPackage ./mirage-bt { };
-  binary-ninja = pkgs.qt6Packages.callPackage ./binary-ninja { };
+  binaryninja-free = pkgs.qt6Packages.callPackage ./binaryninja-free { };
+  binaryninja-pro = pkgs.qt6Packages.callPackage ./binaryninja-pro { };
+  objection = with pkgs.python3Packages; callPackage ./objection { };
 }
