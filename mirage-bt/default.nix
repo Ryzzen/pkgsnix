@@ -1,6 +1,7 @@
-{ lib
-, python3
-, fetchFromGitHub
+{
+  lib,
+  python3,
+  fetchFromGitHub,
 }:
 
 python3.pkgs.buildPythonApplication rec {
@@ -38,7 +39,7 @@ python3.pkgs.buildPythonApplication rec {
     homepage = "https://github.com/RCayre/mirage.git";
     changelog = "https://github.com/RCayre/mirage/blob/${src.rev}/CHANGELOG.md";
     license = licenses.mit;
-    maintainers = with maintainers; [ ryzzen ];
+    maintainers = with maintainers; [ Ryzzen ];
     mainProgram = "mirage";
   };
 }
