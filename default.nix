@@ -22,4 +22,5 @@
   binaryninja-free = pkgs.qt6Packages.callPackage ./binaryninja-free { };
   binaryninja-pro = pkgs.qt6Packages.callPackage ./binaryninja-pro { };
   objection = with pkgs.python3Packages; callPackage ./objection { };
+  allyourbase = pkgs.callPackage ./allyourbase { };
 }
