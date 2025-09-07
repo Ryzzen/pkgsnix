@@ -34,7 +34,7 @@ stdenv.mkDerivation rec {
     owner = "bata24";
     repo = "gef";
     rev = "dev";
-    sha256 = "sha256-pOflt1dM8J9bqgEJKsTNHNpx66+eckhb97dAkfsFAjI=";
+    sha256 = "sha256-RmotW0yhPFESf+yfp7NvGPlEh3mtm+R9clgUCw5uvWQ=";
   };
 
   dontBuild = true;
