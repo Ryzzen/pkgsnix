@@ -1,17 +1,16 @@
-# ghidrassist.nix
 {
   lib,
-  buildGhidraExtension,
   fetchurl,
+  ghidra,
 }:
 
-buildGhidraExtension {
+ghidra.buildGhidraExtension {
   pname = "ghidrassist";
   version = "1.26.0";
 
   src = fetchurl {
     url = "https://github.com/symgraph/GhidrAssist/releases/download/1.26.0/ghidra_12.0_PUBLIC_20260403_GhidrAssist.zip";
-    hash = "12yyj630p807kwmxyzvj59q6c74d93v56p692853zx3wl6lbny1a"; # first build will give you the correct hash
+    sha256 = "12yyj630p807kwmxyzvj59q6c74d93v56p692853zx3wl6lbny1a";
   };
 
   dontUnpack = true;
