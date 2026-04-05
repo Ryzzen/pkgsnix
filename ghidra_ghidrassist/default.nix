@@ -11,7 +11,7 @@ buildGhidraExtension {
 
   src = fetchurl {
     url = "https://github.com/symgraph/GhidrAssist/releases/download/1.26.0/ghidra_12.0_PUBLIC_20260403_GhidrAssist.zip";
-    hash = ""; # first build will give you the correct hash
+    hash = "16jx71hjyzq3l6k9v399drz9fma6himgxvcxbjv5q6vx7m2iyasg"; # first build will give you the correct hash
   };
 
   dontUnpack = true;
