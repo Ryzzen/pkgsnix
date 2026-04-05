@@ -1,10 +1,10 @@
 {
   lib,
   fetchurl,
-  ghidra,
+  ghidra-extensions,
 }:
 
-ghidra.buildGhidraExtension {
+ghidra-extensions.buildGhidraExtension {
   pname = "ghidrassist";
   version = "1.26.0";
 
