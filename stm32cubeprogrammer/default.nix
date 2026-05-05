@@ -26,7 +26,6 @@
 let
   pname = "stm32cubeprog";
   version = "2.21.0";
-  fileVerStr = builtins.replaceStrings [ "." ] [ "-" ] version;
   jdk = openjdk.override (
     lib.optionalAttrs stdenv.hostPlatform.isLinux {
       enableJavaFX = true;
@@ -37,7 +36,7 @@ stdenv.mkDerivation {
   inherit version pname;
 
   src = requireFile rec {
-    name = "stm32cubeprg-lin-v${fileVerStr}.zip";
+    name = "SetupSTM32CubeProgrammer_linux_64.zip";
     url = "https://www.st.com/en/development-tools/stm32cubeprog.html";
     sha256 = "85e35c46793b2f65f7d19cc06e593cabfbbd459e970d58fb962460a918697af2";
   };
