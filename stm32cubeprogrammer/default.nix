@@ -25,7 +25,7 @@
 
 let
   pname = "stm32cubeprog";
-  version = "2.21.0";
+  version = "2.22.0";
   jdk = openjdk.override (
     lib.optionalAttrs stdenv.hostPlatform.isLinux {
       enableJavaFX = true;
