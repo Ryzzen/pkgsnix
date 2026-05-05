@@ -35,10 +35,9 @@ in
 stdenv.mkDerivation {
   inherit version pname;
 
-  src = requireFile rec {
+  src = builtins.path {
+    path = /home/ryzzen/Tools/Stm32CubeProgrammer/SetupSTM32CubeProgrammer_linux_64.zip;
     name = "SetupSTM32CubeProgrammer_linux_64.zip";
-    url = "https://www.st.com/en/development-tools/stm32cubeprog.html";
-    sha256 = "85e35c46793b2f65f7d19cc06e593cabfbbd459e970d58fb962460a918697af2";
   };
 
   nativeBuildInputs = [
@@ -67,7 +66,7 @@ stdenv.mkDerivation {
   ];
 
   unpackCmd = ''
-    unzip -d stm32cubeprg $curSrc SetupSTM32CubeProgrammer-${version}.exe
+    unzip -d . $curSrc SetupSTM32CubeProgrammer-${version}.exe
     mkdir -p stm32cubeprg/jre/bin
     touch stm32cubeprg/jre/bin/java
   '';
