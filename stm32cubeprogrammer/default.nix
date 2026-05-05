@@ -31,6 +31,21 @@ let
       enableJavaFX = true;
     }
   );
+
+  runtimeLibs = [
+    jdk
+    libusb1
+    glib
+    libz
+    libkrb5
+    openssl
+    pcsclite
+    xorg.libX11
+    qt6Packages.qtbase
+    qt6Packages.qtserialport
+    qt6Packages.qtwayland
+    gtk3
+  ];
 in
 stdenv.mkDerivation {
   inherit pname version;
@@ -51,20 +66,7 @@ stdenv.mkDerivation {
     icoutils
   ];
 
-  buildInputs = [
-    jdk
-    libusb1
-    glib
-    libz
-    libkrb5
-    openssl
-    pcsclite
-    xorg.libX11
-    qt6Packages.qtbase
-    qt6Packages.qtserialport
-    qt6Packages.qtwayland
-    gtk3
-  ];
+  buildInputs = runtimeLibs;
 
   unpackCmd = ''
     mkdir -p stm32cubeprg
@@ -96,17 +98,19 @@ stdenv.mkDerivation {
       mv ./stm32cubeprg/* $out
       chmod -R u+w $out
 
-      # Avoid collisions in home-manager-path while keeping ST's bundled Qt libs available.
+      # Move bundled Qt libs to avoid Home Manager collisions
       mkdir -p $out/opt/stm32cubeprog-libs
       mv $out/lib/libQt6*.so* $out/opt/stm32cubeprog-libs/ 2>/dev/null || true
       mv $out/lib/libQt5*.so* $out/opt/stm32cubeprog-libs/ 2>/dev/null || true
 
+      # Fix launcher jar
       mkdir newjar
       cd newjar
       jar -xf $out/bin/STM32CubeProgrammerLauncher
       jar -cfm $out/bin/STM32CubeProgrammerLauncher META-INF/MANIFEST.MF .
       cd ..
 
+      # Icons
       mkdir icons
       icotool -x $out/util/Programmer.ico -o icons/
       cd icons
@@ -115,17 +119,20 @@ stdenv.mkDerivation {
         | bash
       cd ..
 
+      # udev rules
       mkdir -p $out/lib/udev/rules.d/
       mv $out/Drivers/rules/* $out/lib/udev/rules.d/
 
+      # Patch binaries
       autoPatchelf $out/bin/STM32_Programmer_CLI
       autoPatchelf $out/bin/STM32_SigningTool_CLI
       autoPatchelf $out/bin/STM32_KeyGen_CLI
 
-      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath buildInputs}" $out/bin/STM32_Programmer_CLI
-      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath buildInputs}" $out/bin/STM32_SigningTool_CLI
-      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath buildInputs}" $out/bin/STM32_KeyGen_CLI
+      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath runtimeLibs}" $out/bin/STM32_Programmer_CLI
+      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath runtimeLibs}" $out/bin/STM32_SigningTool_CLI
+      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath runtimeLibs}" $out/bin/STM32_KeyGen_CLI
 
+      # Wrapper for GUI launcher
       makeWrapper ${installEnv}/bin/${installEnv.name} $out/bin/${pname} \
         --add-flags "-jar $out/bin/STM32CubeProgrammerLauncher"
 
@@ -145,21 +152,14 @@ stdenv.mkDerivation {
       name = pname;
       icon = pname;
       desktopName = "STM32CubeProgrammer";
-      comment = "All-in-one multi-OS software tool for programming STM32 products";
+      comment = "STM32 programming tool";
       exec = pname;
       categories = [ "Development" ];
     })
   ];
 
   meta = with lib; {
-    description = "All-in-one multi-OS software tool for programming STM32 products";
-    longDescription = ''
-      STM32CubeProgrammer (STM32CubeProg) is an all-in-one multi-OS
-      software tool for programming STM32 products.
-      It provides an easy-to-use and efficient environment for reading,
-      writing, and verifying device memory through both the debug interface
-      (JTAG and SWD) and the bootloader interface.
-    '';
+    description = "STM32CubeProgrammer";
     homepage = "https://www.st.com/en/development-tools/stm32cubeprog.html";
     license = licenses.unfree;
     platforms = [ "x86_64-linux" ];
