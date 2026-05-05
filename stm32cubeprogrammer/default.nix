@@ -89,6 +89,10 @@ stdenv.mkDerivation {
       mkdir $out
       mv ./stm32cubeprg/* $out
 
+      # Avoid collisions with system Qt in home-manager-path
+      rm -f $out/lib/libQt6*.so*
+      rm -f $out/lib/libQt5*.so*
+
       mkdir newjar
       cd newjar
       jar -xf $out/bin/STM32CubeProgrammerLauncher
