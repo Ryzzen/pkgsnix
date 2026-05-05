@@ -26,4 +26,5 @@
   ghidrassist = pkgs.callPackage ./ghidra_ghidrassist {
     buildGhidraExtension = pkgs.ghidra.buildGhidraExtension;
   };
+  stm32cubeprogrammer = pkgs.callPackage ./stm32cubeprogrammer { };
 }
