@@ -1,11 +1,9 @@
 {
   lib,
   stdenv,
-  requireFile,
   autoPatchelfHook,
   unzip,
   openjdk,
-  writeShellScript,
   buildFHSEnv,
   libusb1,
   glib,
@@ -21,11 +19,13 @@
   makeWrapper,
   copyDesktopItems,
   makeDesktopItem,
+  patchelf,
 }:
 
 let
   pname = "stm32cubeprog";
   version = "2.22.0";
+
   jdk = openjdk.override (
     lib.optionalAttrs stdenv.hostPlatform.isLinux {
       enableJavaFX = true;
@@ -33,7 +33,7 @@ let
   );
 in
 stdenv.mkDerivation {
-  inherit version pname;
+  inherit pname version;
 
   src = builtins.path {
     path = /home/ryzzen/Tools/Stm32CubeProgrammer/SetupSTM32CubeProgrammer_linux_64.zip;
@@ -43,6 +43,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     jdk
     unzip
+    patchelf
     qt6Packages.wrapQtAppsHook
     wrapGAppsHook3
     copyDesktopItems
@@ -83,15 +84,22 @@ stdenv.mkDerivation {
     ''
       runHook preInstall
 
-      ${installEnv}/bin/${installEnv.name} -jar -DINSTALL_PATH=stm32cubeprg SetupSTM32CubeProgrammer-${version}.exe -options-system
-      rm -r stm32cubeprg/bin/jre
+      ${installEnv}/bin/${installEnv.name} \
+        -jar \
+        -DINSTALL_PATH=stm32cubeprg \
+        SetupSTM32CubeProgrammer-${version}.exe \
+        -options-system
 
-      mkdir $out
+      rm -rf stm32cubeprg/bin/jre
+
+      mkdir -p $out
       mv ./stm32cubeprg/* $out
+      chmod -R u+w $out
 
-      # Avoid collisions with system Qt in home-manager-path
-      rm -f $out/lib/libQt6*.so*
-      rm -f $out/lib/libQt5*.so*
+      # Avoid collisions in home-manager-path while keeping ST's bundled Qt libs available.
+      mkdir -p $out/opt/stm32cubeprog-libs
+      mv $out/lib/libQt6*.so* $out/opt/stm32cubeprog-libs/ 2>/dev/null || true
+      mv $out/lib/libQt5*.so* $out/opt/stm32cubeprog-libs/ 2>/dev/null || true
 
       mkdir newjar
       cd newjar
@@ -99,10 +107,12 @@ stdenv.mkDerivation {
       jar -cfm $out/bin/STM32CubeProgrammerLauncher META-INF/MANIFEST.MF .
       cd ..
 
-      mkdir icons/
+      mkdir icons
       icotool -x $out/util/Programmer.ico -o icons/
-      cd icons/
-      ls | awk -v prefix=$out/share/icons/hicolor/ -F'[_x.]' '{ dest=prefix $3 "x" $4; print "mkdir -p " dest "/apps/ && mv " $0 " " dest "/apps/" "${pname}" "." $NF}' | bash
+      cd icons
+      ls | awk -v prefix=$out/share/icons/hicolor/ -F'[_x.]' \
+        '{ dest=prefix $3 "x" $4; print "mkdir -p " dest "/apps/ && mv " $0 " " dest "/apps/" "${pname}" "." $NF}' \
+        | bash
       cd ..
 
       mkdir -p $out/lib/udev/rules.d/
@@ -112,7 +122,12 @@ stdenv.mkDerivation {
       autoPatchelf $out/bin/STM32_SigningTool_CLI
       autoPatchelf $out/bin/STM32_KeyGen_CLI
 
-      makeWrapper ${installEnv}/bin/${installEnv.name} $out/bin/${pname} --add-flags "-jar $out/bin/STM32CubeProgrammerLauncher"
+      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath buildInputs}" $out/bin/STM32_Programmer_CLI
+      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath buildInputs}" $out/bin/STM32_SigningTool_CLI
+      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath buildInputs}" $out/bin/STM32_KeyGen_CLI
+
+      makeWrapper ${installEnv}/bin/${installEnv.name} $out/bin/${pname} \
+        --add-flags "-jar $out/bin/STM32CubeProgrammerLauncher"
 
       runHook postInstall
     '';
@@ -143,11 +158,7 @@ stdenv.mkDerivation {
       software tool for programming STM32 products.
       It provides an easy-to-use and efficient environment for reading,
       writing, and verifying device memory through both the debug interface
-      (JTAG and SWD)and the bootloader interface (UART and USB DFU, I2C, SPI, and CAN).
-      STM32CubeProgrammer offers a wide range of features to program STM32 internal memories
-      (such as flash, RAM, and OTP) as well as external memories.
-      STM32CubeProgrammer also allows option programming and upload,
-      programming content verification, and programming automation through scripting.
+      (JTAG and SWD) and the bootloader interface.
     '';
     homepage = "https://www.st.com/en/development-tools/stm32cubeprog.html";
     license = licenses.unfree;
