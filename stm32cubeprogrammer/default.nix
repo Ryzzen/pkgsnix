@@ -64,6 +64,7 @@ stdenv.mkDerivation {
     copyDesktopItems
     autoPatchelfHook
     icoutils
+    makeWrapper
   ];
 
   buildInputs = runtimeLibs;
@@ -94,47 +95,50 @@ stdenv.mkDerivation {
 
       rm -rf stm32cubeprg/bin/jre
 
-      mkdir -p $out
-      mv ./stm32cubeprg/* $out
-      chmod -R u+w $out
+      mkdir -p $out/opt/${pname}
+      mv ./stm32cubeprg/* $out/opt/${pname}
+      chmod -R u+w $out/opt/${pname}
 
-      # Move bundled Qt libs to avoid Home Manager collisions
-      mkdir -p $out/opt/stm32cubeprog-libs
-      mv $out/lib/libQt6*.so* $out/opt/stm32cubeprog-libs/ 2>/dev/null || true
-      mv $out/lib/libQt5*.so* $out/opt/stm32cubeprog-libs/ 2>/dev/null || true
+      mkdir -p $out/bin
 
-      # Fix launcher jar
+      autoPatchelf $out/opt/${pname}/bin/STM32_Programmer_CLI
+      autoPatchelf $out/opt/${pname}/bin/STM32_SigningTool_CLI
+      autoPatchelf $out/opt/${pname}/bin/STM32_KeyGen_CLI
+
+      patchelf --set-rpath "$out/opt/${pname}/lib:${lib.makeLibraryPath runtimeLibs}" $out/opt/${pname}/bin/STM32_Programmer_CLI
+      patchelf --set-rpath "$out/opt/${pname}/lib:${lib.makeLibraryPath runtimeLibs}" $out/opt/${pname}/bin/STM32_SigningTool_CLI
+      patchelf --set-rpath "$out/opt/${pname}/lib:${lib.makeLibraryPath runtimeLibs}" $out/opt/${pname}/bin/STM32_KeyGen_CLI
+
+      makeWrapper $out/opt/${pname}/bin/STM32_Programmer_CLI $out/bin/STM32_Programmer_CLI \
+        --prefix LD_LIBRARY_PATH : "$out/opt/${pname}/lib:${lib.makeLibraryPath runtimeLibs}"
+
+      makeWrapper $out/opt/${pname}/bin/STM32_SigningTool_CLI $out/bin/STM32_SigningTool_CLI \
+        --prefix LD_LIBRARY_PATH : "$out/opt/${pname}/lib:${lib.makeLibraryPath runtimeLibs}"
+
+      makeWrapper $out/opt/${pname}/bin/STM32_KeyGen_CLI $out/bin/STM32_KeyGen_CLI \
+        --prefix LD_LIBRARY_PATH : "$out/opt/${pname}/lib:${lib.makeLibraryPath runtimeLibs}"
+
       mkdir newjar
       cd newjar
-      jar -xf $out/bin/STM32CubeProgrammerLauncher
-      jar -cfm $out/bin/STM32CubeProgrammerLauncher META-INF/MANIFEST.MF .
+      jar -xf $out/opt/${pname}/bin/STM32CubeProgrammerLauncher
+      jar -cfm $out/opt/${pname}/bin/STM32CubeProgrammerLauncher META-INF/MANIFEST.MF .
       cd ..
 
-      # Icons
+      makeWrapper ${installEnv}/bin/${installEnv.name} $out/bin/${pname} \
+        --prefix LD_LIBRARY_PATH : "$out/opt/${pname}/lib:${lib.makeLibraryPath runtimeLibs}" \
+        --add-flags "-jar $out/opt/${pname}/bin/STM32CubeProgrammerLauncher"
+
+      mkdir -p $out/share/icons/hicolor
       mkdir icons
-      icotool -x $out/util/Programmer.ico -o icons/
+      icotool -x $out/opt/${pname}/util/Programmer.ico -o icons/
       cd icons
       ls | awk -v prefix=$out/share/icons/hicolor/ -F'[_x.]' \
         '{ dest=prefix $3 "x" $4; print "mkdir -p " dest "/apps/ && mv " $0 " " dest "/apps/" "${pname}" "." $NF}' \
         | bash
       cd ..
 
-      # udev rules
       mkdir -p $out/lib/udev/rules.d/
-      mv $out/Drivers/rules/* $out/lib/udev/rules.d/
-
-      # Patch binaries
-      autoPatchelf $out/bin/STM32_Programmer_CLI
-      autoPatchelf $out/bin/STM32_SigningTool_CLI
-      autoPatchelf $out/bin/STM32_KeyGen_CLI
-
-      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath runtimeLibs}" $out/bin/STM32_Programmer_CLI
-      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath runtimeLibs}" $out/bin/STM32_SigningTool_CLI
-      patchelf --set-rpath "$out/lib:$out/opt/stm32cubeprog-libs:${lib.makeLibraryPath runtimeLibs}" $out/bin/STM32_KeyGen_CLI
-
-      # Wrapper for GUI launcher
-      makeWrapper ${installEnv}/bin/${installEnv.name} $out/bin/${pname} \
-        --add-flags "-jar $out/bin/STM32CubeProgrammerLauncher"
+      mv $out/opt/${pname}/Drivers/rules/* $out/lib/udev/rules.d/
 
       runHook postInstall
     '';
