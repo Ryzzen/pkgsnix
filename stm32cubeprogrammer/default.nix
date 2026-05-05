@@ -66,7 +66,8 @@ stdenv.mkDerivation {
   ];
 
   unpackCmd = ''
-    unzip -d . $curSrc SetupSTM32CubeProgrammer-${version}.exe
+    mkdir -p stm32cubeprg
+    unzip -d stm32cubeprg $curSrc SetupSTM32CubeProgrammer-${version}.exe
     mkdir -p stm32cubeprg/jre/bin
     touch stm32cubeprg/jre/bin/java
   '';
