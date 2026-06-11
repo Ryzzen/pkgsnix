@@ -27,4 +27,5 @@
     buildGhidraExtension = pkgs.ghidra.buildGhidraExtension;
   };
   stm32cubeprogrammer = pkgs.callPackage ./stm32cubeprogrammer { };
+  kicad-mcp = pkgs.callPackage ./kicad-mcp { };
 }
