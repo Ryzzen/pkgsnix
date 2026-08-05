@@ -39,7 +39,7 @@ python3.pkgs.buildPythonApplication rec {
     homepage = "https://github.com/RCayre/mirage.git";
     changelog = "https://github.com/RCayre/mirage/blob/${src.rev}/CHANGELOG.md";
     license = licenses.mit;
-    maintainers = with maintainers; [ Ryzzen ];
+    maintainers = with maintainers; [ ];
     mainProgram = "mirage";
   };
 }

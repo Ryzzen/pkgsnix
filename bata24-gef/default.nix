@@ -91,6 +91,6 @@ stdenv.mkDerivation rec {
     homepage = "https://github.com/hugsy/gef";
     license = licenses.mit;
     platforms = platforms.all;
-    maintainers = with maintainers; [ ryzzen ];
+    maintainers = with maintainers; [ ];
   };
 }

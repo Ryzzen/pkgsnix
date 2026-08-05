@@ -35,7 +35,7 @@ python3.pkgs.buildPythonApplication rec {
     description = "Finds the base address of a firmware by comparing string addresses with target pointer addresses";
     homepage = "https://github.com/8051Enthusiast/allyourbase";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ Ryzzen ];
+    maintainers = with lib.maintainers; [ ];
     mainProgram = "allyourbase";
     platforms = lib.platforms.all;
   };
