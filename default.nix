@@ -28,4 +28,13 @@
   };
   stm32cubeprogrammer = pkgs.callPackage ./stm32cubeprogrammer { };
   kicad-mcp = pkgs.callPackage ./kicad-mcp { };
+
+  # OctoPrint plugins nixpkgs does not package (it already has abl-expert and
+  # bedlevelvisualizer). callPackage'd from octoprint's OWN python set so they
+  # get `buildPlugin` and the same interpreter OctoPrint runs on — plugins built
+  # against pkgs.python3Packages will not load. Consumed by the octoprint module
+  # in nix-config; see its docs/octoprint.md.
+  octoprint-bltouch = pkgs.octoprint.python.pkgs.callPackage ./octoprint-plugins/bltouch { };
+  octoprint-preheat = pkgs.octoprint.python.pkgs.callPackage ./octoprint-plugins/preheat { };
+  octoprint-prusaslicerthumbnails = pkgs.octoprint.python.pkgs.callPackage ./octoprint-plugins/prusaslicerthumbnails { };
 }
