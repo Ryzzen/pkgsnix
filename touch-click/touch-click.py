@@ -238,35 +238,17 @@ def main():
         """Should this point get a synthetic click?"""
         ns, mapped = layer_at(lx, ly)
 
-        # A listed layer is open, but the tap landed somewhere else. rofi's own
-        # click-to-exit cannot help here: its surface is only the centred box
-        # (measured 480x355 on a 1200x800 screen), so "outside" is not on its
-        # surface at all and it never hears the tap. Dismiss it instead, and
-        # swallow the tap rather than passing a click to whatever is underneath -
-        # clicking away should close the launcher, not press something behind it.
-        #
-        # Killing by namespace assumes the namespace matches the process name,
-        # which holds for rofi. A layer where it does not would simply not close.
-        stray = (mapped & layer_allow) - ({ns.lower()} if ns else set())
-        if stray:
-            for proc in stray:
-                subprocess.Popen(
-                    ["pkill", "-x", proc],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-            return False
-
         if ns is not None:
-            # A layer is in the way. Most take touch themselves - the bar, the
-            # on-screen keyboard - and clicking them would double the input, so
-            # leave those strictly alone. The listed ones are layer surfaces that
-            # never bind wl_touch, rofi being the case in point: it is a layer,
-            # so no window class describes it, and without this a tablet cannot
-            # pick an entry, cannot dismiss it by tapping away, and cannot even
-            # reach the bar underneath, because rofi takes the touch and does
-            # nothing with it.
-            if ns.lower() not in layer_allow:
+            # The tap is on a layer surface, and that layer owns it - whatever
+            # else happens to be open. No dismissing down this path. Getting that
+            # wrong made tapping a key on the on-screen keyboard, or the keyboard
+            # button in the bar, close the launcher instead: neither tap is on
+            # rofi's surface, and "not on rofi" was being read as "outside rofi".
+            #
+            # Layers that take touch themselves - the bar, the keyboard - are
+            # obstacles to stay off, or the injected click doubles their input.
+            # Listed ones never bind wl_touch and need the click.
+            if ns not in layer_allow:
                 return False
             try:
                 hypr(f"/dispatch movecursor {int(lx)} {int(ly)}")
@@ -274,6 +256,26 @@ def main():
                 log(f"IPC failed mid-touch: {e}")
                 return False
             return True
+
+        # No layer here at all, so this really is a tap out in the open. If a
+        # listed layer is up, this is the tap that dismisses it: rofi's surface is
+        # only its centred box (measured 480x355 on a 1200x800 screen), so its own
+        # click-to-exit never hears a tap beside it.
+        #
+        # Killing by namespace assumes it matches the process name, which holds
+        # for rofi. A layer where it did not would simply stay open.
+        stray = mapped & layer_allow
+        if stray:
+            for proc in stray:
+                subprocess.Popen(
+                    ["pkill", "-x", proc],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            # Swallowed: tapping away should close the launcher, not also press
+            # whatever happened to be behind it.
+            return False
+
         try:
             hypr(f"/dispatch movecursor {int(lx)} {int(ly)}")
             win = hypr_json("activewindow") or {}
