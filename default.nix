@@ -4,6 +4,7 @@
   # example = pkgs.callPackage ./example { };
   # libtriton = pkgs.callPackage ./triton { };
   bata24-gef = pkgs.callPackage ./bata24-gef { };
+  touch-click = pkgs.callPackage ./touch-click { };
   # ghidra-extensions = pkgs.callPackage ./ghidra-extensions { ghidra = pkgs.ghidra-bin; };
   gr-satellites = pkgs.callPackage ./gnuradio-blocks/gr-satellites {
     gnuradio = pkgs.gnuradio.unwrapped;
