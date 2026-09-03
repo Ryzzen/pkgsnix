@@ -31,8 +31,8 @@ python3Packages.buildPythonApplication rec {
   src = fetchFromGitHub {
     owner = "Ryzzen";
     repo = "MicroscopeControl";
-    rev = "049834b694ecaf7cb9b113be4862e3711c2619d2";
-    hash = "sha256-7UK5OPOfWO+1fr2Pq+pMPUyHn5129ZfEIe8ierqjt1k=";
+    rev = "2b93dff7822e35201c3b4d8d0f0bb5f348b95261";
+    hash = "sha256-YkmhryAJhVuzFSbW/u8jGmiu4jyEuRkasppdqXvKCCA=";
   };
 
   build-system = [ python3Packages.hatchling ];
