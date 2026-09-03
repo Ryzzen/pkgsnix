@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Upright compound microscope. Neutral grey for the stand (base, arm,
+       stage), one accent colour for the optical column (eyepiece, body tube,
+       objective) so the light path reads at small sizes. -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#e6e6ea" stroke-width="4.5">
+      <!-- base -->
+      <path d="M12 55 H52" />
+      <!-- arm sweeping from the base up to the head -->
+      <path d="M46 55 C48 41 44 31 36 26" />
+      <!-- stage, with the slide overhanging to the left -->
+      <path d="M13 40 H38" />
+    </g>
+    <g stroke="#5aa9f0">
+      <!-- eyepiece -->
+      <path d="M19 10 H31" stroke-width="4.5" />
+      <!-- body tube -->
+      <path d="M25 10 V28" stroke-width="5.5" />
+      <!-- objective, narrowing toward the specimen on the stage -->
+      <path d="M25 28 V35" stroke-width="3.5" />
+    </g>
+  </g>
+</svg>

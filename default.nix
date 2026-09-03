@@ -29,6 +29,7 @@
   };
   stm32cubeprogrammer = pkgs.callPackage ./stm32cubeprogrammer { };
   kicad-mcp = pkgs.callPackage ./kicad-mcp { };
+  microscope-control = pkgs.callPackage ./microscope-control { };
 
   # OctoPrint plugins nixpkgs does not package (it already has abl-expert and
   # bedlevelvisualizer). callPackage'd from octoprint's OWN python set so they
