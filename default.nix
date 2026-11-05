@@ -31,6 +31,11 @@
   kicad-mcp = pkgs.callPackage ./kicad-mcp { };
   microscope-control = pkgs.callPackage ./microscope-control { };
 
+  # Scripted-CAD python env: build123d (B-rep on OCCT) + ezdxf/trimesh for
+  # design verification. Exposes a single `cadpython` binary. Consumed by the
+  # dev profile in nix-config; see its header for the wheel-pinning rationale.
+  cad-python = pkgs.callPackage ./cad-python { };
+
   # OctoPrint plugins nixpkgs does not package (it already has abl-expert and
   # bedlevelvisualizer). callPackage'd from octoprint's OWN python set so they
   # get `buildPlugin` and the same interpreter OctoPrint runs on — plugins built
